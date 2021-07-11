@@ -1,5 +1,7 @@
 package com.raywenderlich.android.starsync.ui.mainscreen
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.raywenderlich.android.starsync.contract.DataRepositoryContract
 import com.raywenderlich.android.starsync.contract.ItemListCallback
 import com.raywenderlich.android.starsync.contract.PresenterContract
@@ -9,15 +11,16 @@ import com.raywenderlich.android.starsync.utils.BACKGROUND_THREAD
 import com.raywenderlich.android.starsync.utils.FetchFromLocalDbTask
 import com.raywenderlich.android.starsync.utils.ProcessUsing
 import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
 class MainActivityPresenter(var view: ViewContract?, var repository: DataRepositoryContract?) :
-    PresenterContract {
+    PresenterContract,CoroutineScope,DefaultLifecycleObserver {
 
-  private val processingUsing = ProcessUsing.BackgroundThread
+  private val processingUsing = ProcessUsing.Coroutines
 
   private val coroutineJob = Job()
 
-  private val coroutineScope = CoroutineScope(coroutineJob)
+  override val coroutineContext: CoroutineContext = Dispatchers.Main + coroutineJob
 
   init {
     view?.hideLoading()
@@ -25,7 +28,7 @@ class MainActivityPresenter(var view: ViewContract?, var repository: DataReposit
 
   override fun cleanup() {
     // Cancel all coroutines running in this context
-    coroutineJob.cancel()
+    coroutineContext.cancel()
 
     this.view = null
     this.repository = null
@@ -84,7 +87,7 @@ class MainActivityPresenter(var view: ViewContract?, var repository: DataReposit
   }
 
   private fun fetchUsingCoroutines() {
-    coroutineScope.launch {
+    launch {
       try {
         // Fetch from local first, using the background thread
         var itemList = withContext(Dispatchers.IO) {
@@ -131,7 +134,7 @@ class MainActivityPresenter(var view: ViewContract?, var repository: DataReposit
   }
 
   private fun saveDataUsingCoroutines(itemList: List<People>) {
-    coroutineScope.launch(Dispatchers.IO) {
+    launch(Dispatchers.IO) {
       // save items to db
       repository?.saveData(itemList)
     }
@@ -142,5 +145,15 @@ class MainActivityPresenter(var view: ViewContract?, var repository: DataReposit
       // save items to db
       repository?.saveData(itemList)
     }
+  }
+
+  override fun onResume(owner: LifecycleOwner) {
+    super.onResume(owner)
+    getData()
+  }
+
+  override fun onDestroy(owner: LifecycleOwner) {
+    cleanup()
+    super.onDestroy(owner)
   }
 }

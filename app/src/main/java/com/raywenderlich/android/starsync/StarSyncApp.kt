@@ -1,6 +1,7 @@
 package com.raywenderlich.android.starsync
 
 import android.app.Application
+import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy.KEEP
 import androidx.work.NetworkType.UNMETERED
@@ -15,9 +16,20 @@ class StarSyncApp : Application() {
     super.onCreate()
 
     setupWorkManagerJob()
+    setupExceptionHandler()
   }
 
-  private fun setupWorkManagerJob() {
+    private fun setupExceptionHandler() {
+        /*
+            In the case of exceptions that are not handled on Android, there exists an UncaughtExceptionHandler, which can be configured in the Application class.
+            By default, coroutines use the default Android policy on uncaught exception handling if no try-catch is set up for exception handling.
+         */
+        Thread.setDefaultUncaughtExceptionHandler { _, e ->
+            Log.e("UncaughtExpHandler", e.message)
+        }
+    }
+
+    private fun setupWorkManagerJob() {
     val constraints = Constraints.Builder()
         .setRequiresCharging(true)
         .setRequiredNetworkType(UNMETERED)

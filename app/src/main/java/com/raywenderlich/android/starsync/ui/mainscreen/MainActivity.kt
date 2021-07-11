@@ -53,8 +53,6 @@ class MainActivity : AppCompatActivity(), ViewContract {
 
   private var peopleListAdapter = PeopleListAdapter()
 
-  private var presenter: PresenterContract? = null
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -73,8 +71,8 @@ class MainActivity : AppCompatActivity(), ViewContract {
     val repository = DataRepository(localRepo, remoteRepo)
 
     // Setup the presenter
-    presenter = MainActivityPresenter(this, repository)
-    //TODO: Observe the lifecycle
+    val presenter = MainActivityPresenter(this, repository)
+    lifecycle.addObserver(presenter)
 
     // Setup FAB
     fab.setOnClickListener {
@@ -128,14 +126,4 @@ class MainActivity : AppCompatActivity(), ViewContract {
     Snackbar.make(rootLayout, string ?: "-", Snackbar.LENGTH_SHORT).show()
   }
 
-  override fun onResume() {
-    super.onResume()
-    presenter?.getData()
-  }
-
-  override fun onDestroy() {
-    presenter?.cleanup()
-
-    super.onDestroy()
-  }
 }

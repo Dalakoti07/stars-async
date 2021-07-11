@@ -6,6 +6,7 @@ import com.raywenderlich.android.starsync.contract.RemoteRepositoryContract
 import com.raywenderlich.android.starsync.repository.model.BasePeople
 import com.raywenderlich.android.starsync.repository.model.People
 import com.raywenderlich.android.starsync.utils.isOnline
+import com.raywenderlich.android.starsync.utils.logCoroutineInfo
 import retrofit2.Call
 import retrofit2.Response
 
@@ -14,6 +15,7 @@ class RemoteRepo(val context: Context) : RemoteRepositoryContract {
   private val retrofitService = RemoteApi.starWarsService
 
   override suspend fun getDataUsingCoroutines(): List<People> {
+    logCoroutineInfo("Fetching from remote")
     return if (context.isOnline()) {
       val request = retrofitService.getUsingCoroutines()
       val response = request.await()

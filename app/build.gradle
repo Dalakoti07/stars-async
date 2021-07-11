@@ -79,8 +79,9 @@ dependencies {
   //endregion
 
   //region Lifecycle
-  //TODO: add lifecycle dependencies here
-
+  final lifecycleVersion = "2.0.0"
+  implementation "androidx.lifecycle:lifecycle-runtime:$lifecycleVersion"
+  implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
   //endregion
 
   //region WorkManager

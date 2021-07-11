@@ -38,3 +38,5 @@ fun View.hide() {
 
 val BACKGROUND_THREAD = Executors.newCachedThreadPool()
 
+// Log Coroutines
+fun logCoroutineInfo(msg: String) = println("Running on: [${Thread.currentThread().name}] | $msg")
